@@ -1,0 +1,9 @@
+
+     $ hydra_
+
+    simple daemon that listens to various services
+    and produces output to listening clients.
+
+    todo
+     - [ ] look into memory consumption
+     - [ ] add support for config file
