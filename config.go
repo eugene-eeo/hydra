@@ -7,13 +7,12 @@ import "io"
 import "os/exec"
 
 type MatcherConfig struct {
-	Name    string
-	Matcher interface{}
+	Name    string      `json:"name"`
+	Matcher interface{} `json:"matcher"`
 	matcher Matcher
 }
 
 type ProcConfig struct {
-	Name     string           `json:"name"`
 	Proc     []string         `json:"proc"`
 	Matchers []*MatcherConfig `json:"matchers"`
 }
