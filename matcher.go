@@ -9,6 +9,7 @@ type Matcher interface {
 	Match(string) bool
 }
 
+type TrueMatcher struct{}
 type OrMatcher []Matcher
 type AndMatcher []Matcher
 type RegexMatcher struct {
@@ -37,7 +38,14 @@ func (r *RegexMatcher) Match(s string) bool {
 	return r.r.MatchString(s)
 }
 
+func (t *TrueMatcher) Match(string) bool {
+	return true
+}
+
 func interfaceToMatcher(v interface{}) (Matcher, error) {
+	if v == nil {
+		return &TrueMatcher{}, nil
+	}
 	switch v.(type) {
 	case string:
 		return &RegexMatcher{regexp.MustCompile(v.(string))}, nil

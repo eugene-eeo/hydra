@@ -10,9 +10,6 @@ func nmcliEvents(events chan string) error {
 	if err != nil {
 		return err
 	}
-	if err := cmd.Start(); err != nil {
-		return err
-	}
 	go func() {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
@@ -24,5 +21,5 @@ func nmcliEvents(events chan string) error {
 		}
 		_ = cmd.Wait()
 	}()
-	return nil
+	return cmd.Start()
 }

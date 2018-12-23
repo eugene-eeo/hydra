@@ -1,7 +1,5 @@
 package main
 
-import "os"
-import "fmt"
 import "net"
 
 func server(events chan string) {
@@ -16,7 +14,8 @@ func server(events chan string) {
 				b := append([]byte(evt), '\n')
 				for i := len(conns) - 1; i >= 0; i-- {
 					c := conns[i]
-					if _, err := c.Write(b); err != nil {
+					_, err := c.Write(b)
+					if err != nil {
 						_ = c.Close()
 						conns = append(conns[:i], conns[i+1:]...)
 					}
@@ -25,12 +24,10 @@ func server(events chan string) {
 		}
 	}()
 	ln, err := net.Listen("tcp", "localhost:9900")
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	must(err)
 	for {
-		if conn, err := ln.Accept(); err == nil {
+		conn, err := ln.Accept()
+		if err == nil {
 			subs <- conn
 		}
 	}
