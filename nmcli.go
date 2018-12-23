@@ -17,7 +17,8 @@ func nmcliEvents(events chan string) error {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			// disconnected has the same suffix
-			if strings.HasSuffix(r.Text(), "connected") {
+			line := r.Text()
+			if strings.HasSuffix(line, "connected") || strings.HasSuffix(line, "available") {
 				events <- "nmcli"
 			}
 		}

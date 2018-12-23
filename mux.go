@@ -13,12 +13,10 @@ func server(events chan string) {
 			case sub := <-subs:
 				conns = append(conns, sub)
 			case evt := <-events:
-				n := len(conns)
 				b := append([]byte(evt), '\n')
-				for i := n - 1; i >= 0; i-- {
+				for i := len(conns) - 1; i >= 0; i-- {
 					c := conns[i]
-					_, err := c.Write(b)
-					if err != nil {
+					if _, err := c.Write(b); err != nil {
 						_ = c.Close()
 						conns = append(conns[:i], conns[i+1:]...)
 					}
