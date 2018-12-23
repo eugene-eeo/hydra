@@ -1,7 +1,8 @@
-# hydra
+# Hydra
 
 Hydra is a simple daemon that runs in the background and emits events to clients.
 It is an overkill (some would say un-UNIX-y) solution/alternative to polling in panel scripts.
+By default Hydra listens on port 9900.
 
 ## Install
 
