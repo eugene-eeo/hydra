@@ -4,25 +4,24 @@ import "bufio"
 import "strings"
 import "os/exec"
 
-func pactlEvents() (chan bool, error) {
+func pactlEvents(events chan string) error {
 	cmd := exec.Command("pactl", "subscribe")
 	out, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := cmd.Start(); err != nil {
-		return nil, err
+		return err
 	}
-	events := make(chan bool)
 	go func() {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			line := r.Text()
 			if strings.Contains(line, "change") && strings.Contains(line, "sink") {
-				events <- true
+				events <- "pactl"
 			}
 		}
 		_ = cmd.Wait()
 	}()
-	return events, nil
+	return nil
 }

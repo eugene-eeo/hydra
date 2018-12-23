@@ -4,25 +4,24 @@ import "bufio"
 import "os/exec"
 import "strings"
 
-func nmcliEvents() (chan bool, error) {
+func nmcliEvents(events chan string) error {
 	cmd := exec.Command("nmcli", "monitor")
 	out, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := cmd.Start(); err != nil {
-		return nil, err
+		return err
 	}
-	events := make(chan bool)
 	go func() {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			// disconnected has the same suffix
 			if strings.HasSuffix(r.Text(), "connected") {
-				events <- true
+				events <- "nmcli"
 			}
 		}
 		_ = cmd.Wait()
 	}()
-	return events, nil
+	return nil
 }
