@@ -34,8 +34,8 @@ To add support for listening to other services, you can add to the
     {
       "proc": ["herbstluftwm", "--idle"],
       "matchers": [
-        {"name": "hc:focus",      "matcher": "^focus_changed"},
-        {"name": "hc:tag_change", "matcher": "^tag_changed"},
+        {"name": "hc:focus",      "regex": "^focus_changed"},
+        {"name": "hc:tag_change", "regex": "^tag_changed"},
       ]
     }
   ]
@@ -48,30 +48,13 @@ Note that the order of the matchers are important. For instance,
 the following produce different output:
 
 ```
-[                                  | [
-  {"name": "1", "matcher": "^a"},  |   {"name": "2", "matcher": "^ab"},
-  {"name": "2", "matcher": "^ab"}, |   {"name": "1", "matcher": "^a"},
-]                                  | ]
+[                                | [
+  {"name": "1", "regex": "^a"},  |   {"name": "2", "regex": "^ab"},
+  {"name": "2", "regex": "^ab"}, |   {"name": "1", "regex": "^a"},
+]                                | ]
 ```
 
 In the first case, the `1` event is always fired regardless of whether
 the matchers for `2` match. This is intended behaviour from hydra's side.
 If you want your intended behaviour to be used then the second case is
 probably what you want.
-
-A more involved example for a matcher:
-
-```json
-{
-  "&&": [
-    {"||": ["^abc", "def$"]},
-    "[0-9]",
-    "tag"
-  ]
-}
-```
-
-this matcher matches all lines that match `[0-9]`, `tag`, and
-(`^abc` or `def$`). The matchers are nestable and very powerful.
-If a matcher is null then it will always match. This is an efficient
-alternative to the "" matcher.

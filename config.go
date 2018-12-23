@@ -5,11 +5,12 @@ import "encoding/json"
 import "fmt"
 import "io"
 import "os/exec"
+import "regexp"
 
 type MatcherConfig struct {
-	Name    string      `json:"name"`
-	Matcher interface{} `json:"matcher"`
-	matcher Matcher
+	Name  string `json:"name"`
+	Regex string `json:"regex"`
+	regex *regexp.Regexp
 }
 
 type ProcConfig struct {
@@ -35,11 +36,7 @@ func parseConfig(r io.Reader) (*Config, error) {
 			return nil, fmt.Errorf("parseConfig: proc is empty")
 		}
 		for _, mc := range pc.Matchers {
-			m, err := interfaceToMatcher(mc.Matcher)
-			if err != nil {
-				return nil, fmt.Errorf("parseConfig: error parsing \"%s\": %e", mc.Name, err)
-			}
-			mc.matcher = m
+			mc.regex = regexp.MustCompile(mc.Regex)
 		}
 	}
 	return c, nil
@@ -55,7 +52,7 @@ func (p *ProcConfig) Run(events chan string) error {
 		for r.Scan() {
 			line := r.Text()
 			for _, mc := range p.Matchers {
-				if mc.matcher.Match(line) {
+				if mc.regex.MatchString(line) {
 					events <- mc.Name
 					break
 				}
