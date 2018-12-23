@@ -29,8 +29,8 @@ func main() {
 	if config.EnableNmcli {
 		must(nmcliEvents(events))
 	}
-	for _, pc := range config.ProcConfigs {
-		must(pc.Run(events))
+	for _, p := range config.Procs {
+		must(p.Run(events))
 	}
 	server(events)
 }

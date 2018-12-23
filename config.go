@@ -7,18 +7,29 @@ import "io"
 import "os/exec"
 import "regexp"
 
-type MatcherConfig struct {
-	Name  string `json:"name"`
-	Regex string `json:"regex"`
+type Matcher struct {
+	name  string
 	regex *regexp.Regexp
 }
 
-type ProcConfig struct {
-	Proc     []string         `json:"proc"`
-	Matchers []*MatcherConfig `json:"matchers"`
+type Proc struct {
+	cmd      string
+	args     []string
+	matchers []Matcher
 }
 
 type Config struct {
+	EnableNmcli bool
+	EnablePactl bool
+	Procs       []*Proc
+}
+
+type ProcConfig struct {
+	Proc     []string    `json:"proc"`
+	Matchers [][2]string `json:"match"`
+}
+
+type JSONConfig struct {
 	EnableNmcli bool          `json:"nmcli"`
 	EnablePactl bool          `json:"pactl"`
 	ProcConfigs []*ProcConfig `json:"procs"`
@@ -26,24 +37,37 @@ type Config struct {
 
 func parseConfig(r io.Reader) (*Config, error) {
 	d := json.NewDecoder(r)
-	c := &Config{}
+	c := &JSONConfig{}
 	err := d.Decode(c)
 	if err != nil {
 		return nil, err
 	}
-	for _, pc := range c.ProcConfigs {
+	cc := &Config{}
+	cc.EnableNmcli = c.EnableNmcli
+	cc.EnablePactl = c.EnablePactl
+	cc.Procs = make([]*Proc, len(c.ProcConfigs))
+	for i, pc := range c.ProcConfigs {
 		if len(pc.Proc) == 0 {
 			return nil, fmt.Errorf("parseConfig: proc is empty")
 		}
-		for _, mc := range pc.Matchers {
-			mc.regex = regexp.MustCompile(mc.Regex)
+		matchers := make([]Matcher, len(pc.Matchers))
+		for j, m := range pc.Matchers {
+			matchers[j] = Matcher{
+				name:  m[0],
+				regex: regexp.MustCompile(m[1]),
+			}
+		}
+		cc.Procs[i] = &Proc{
+			cmd:      pc.Proc[0],
+			args:     pc.Proc[1:],
+			matchers: matchers,
 		}
 	}
-	return c, nil
+	return cc, nil
 }
 
-func (p *ProcConfig) Run(events chan string) error {
-	cmd := exec.Command(p.Proc[0], p.Proc[1:]...)
+func (p *Proc) Run(events chan string) error {
+	cmd := exec.Command(p.cmd, p.args...)
 	out, _ := cmd.StdoutPipe()
 	go func() {
 		// Expect that the process will close stdout when a signal is
@@ -51,9 +75,9 @@ func (p *ProcConfig) Run(events chan string) error {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			line := r.Text()
-			for _, mc := range p.Matchers {
-				if mc.regex.MatchString(line) {
-					events <- mc.Name
+			for _, m := range p.matchers {
+				if m.regex.MatchString(line) {
+					events <- m.name
 					break
 				}
 			}
