@@ -1,10 +1,11 @@
 package main
 
 import "bufio"
+import "os"
 import "os/exec"
 import "strings"
 
-func nmcliEvents(events chan string) error {
+func nmcliEvents(events chan string, procs *[]*os.Process) error {
 	cmd := exec.Command("nmcli", "monitor")
 	out, err := cmd.StdoutPipe()
 	if err != nil {
@@ -21,5 +22,7 @@ func nmcliEvents(events chan string) error {
 			}
 		}
 	}()
-	return cmd.Start()
+	err = cmd.Start()
+	*procs = append(*procs, cmd.Process)
+	return err
 }

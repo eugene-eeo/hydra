@@ -2,16 +2,16 @@ package main
 
 import "bufio"
 import "strings"
+import "os"
 import "os/exec"
 
-func pactlEvents(events chan string) error {
+func pactlEvents(events chan string, procs *[]*os.Process) error {
 	cmd := exec.Command("pactl", "subscribe")
 	out, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
 	}
 	go func() {
-		defer cmd.Process.Kill()
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			line := r.Text()
@@ -20,5 +20,7 @@ func pactlEvents(events chan string) error {
 			}
 		}
 	}()
-	return cmd.Start()
+	err = cmd.Start()
+	*procs = append(*procs, cmd.Process)
+	return err
 }

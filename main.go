@@ -1,6 +1,8 @@
 package main
 
 import "os"
+import "os/signal"
+import "syscall"
 import "github.com/mitchellh/go-homedir"
 
 func read_config() *Config {
@@ -23,14 +25,27 @@ func must(err error) {
 func main() {
 	config := read_config()
 	events := make(chan string, 5)
+	procs := []*os.Process{}
+	sigs := make(chan os.Signal, 2)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		for _ = range sigs {
+			for _, proc := range procs {
+				_ = proc.Kill()
+			}
+			os.Exit(0)
+		}
+	}()
+
 	if config.EnablePactl {
-		must(pactlEvents(events))
+		must(pactlEvents(events, &procs))
 	}
 	if config.EnableNmcli {
-		must(nmcliEvents(events))
+		must(nmcliEvents(events, &procs))
 	}
 	for _, p := range config.Procs {
-		must(p.Run(events))
+		must(p.Run(events, &procs))
 	}
 	server(events)
 }

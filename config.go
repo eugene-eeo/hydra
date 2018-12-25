@@ -4,6 +4,7 @@ import "bufio"
 import "encoding/json"
 import "fmt"
 import "io"
+import "os"
 import "os/exec"
 import "regexp"
 
@@ -66,11 +67,10 @@ func parseConfig(r io.Reader) (*Config, error) {
 	return cc, nil
 }
 
-func (p *Proc) Run(events chan string) error {
+func (p *Proc) Run(events chan string, procs *[]*os.Process) error {
 	cmd := exec.Command(p.cmd, p.args...)
 	out, _ := cmd.StdoutPipe()
 	go func() {
-		defer cmd.Process.Kill()
 		// Expect that the process will close stdout when a signal is
 		// sent to kill it.
 		r := bufio.NewScanner(out)
@@ -84,5 +84,7 @@ func (p *Proc) Run(events chan string) error {
 			}
 		}
 	}()
-	return cmd.Start()
+	err := cmd.Start()
+	*procs = append(*procs, cmd.Process)
+	return err
 }
