@@ -11,6 +11,7 @@ func nmcliEvents(events chan string) error {
 		return err
 	}
 	go func() {
+		defer cmd.Process.Kill()
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			// disconnected has the same suffix
@@ -19,7 +20,6 @@ func nmcliEvents(events chan string) error {
 				events <- "nmcli"
 			}
 		}
-		_ = cmd.Wait()
 	}()
 	return cmd.Start()
 }

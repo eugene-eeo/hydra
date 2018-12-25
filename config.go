@@ -70,6 +70,7 @@ func (p *Proc) Run(events chan string) error {
 	cmd := exec.Command(p.cmd, p.args...)
 	out, _ := cmd.StdoutPipe()
 	go func() {
+		defer cmd.Process.Kill()
 		// Expect that the process will close stdout when a signal is
 		// sent to kill it.
 		r := bufio.NewScanner(out)
@@ -82,7 +83,6 @@ func (p *Proc) Run(events chan string) error {
 				}
 			}
 		}
-		_ = cmd.Wait()
 	}()
 	return cmd.Start()
 }
