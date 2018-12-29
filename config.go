@@ -67,9 +67,12 @@ func parseConfig(r io.Reader) (*Config, error) {
 	return cc, nil
 }
 
-func (p *Proc) Run(events chan string, procs *[]*os.Process) error {
+func (p *Proc) Run(events chan string) (*os.Process, error) {
 	cmd := exec.Command(p.cmd, p.args...)
-	out, _ := cmd.StdoutPipe()
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
 	go func() {
 		// Expect that the process will close stdout when a signal is
 		// sent to kill it.
@@ -84,7 +87,6 @@ func (p *Proc) Run(events chan string, procs *[]*os.Process) error {
 			}
 		}
 	}()
-	err := cmd.Start()
-	*procs = append(*procs, cmd.Process)
-	return err
+	err = cmd.Start()
+	return cmd.Process, err
 }

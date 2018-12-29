@@ -39,13 +39,19 @@ func main() {
 	}()
 
 	if config.EnablePactl {
-		must(pactlEvents(events, &procs))
+		proc, err := pactlEvents(events)
+		must(err)
+		procs = append(procs, proc)
 	}
 	if config.EnableNmcli {
-		must(nmcliEvents(events, &procs))
+		proc, err := nmcliEvents(events)
+		must(err)
+		procs = append(procs, proc)
 	}
 	for _, p := range config.Procs {
-		must(p.Run(events, &procs))
+		proc, err := p.Run(events)
+		must(err)
+		procs = append(procs, proc)
 	}
 	server(events)
 }
