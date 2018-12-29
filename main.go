@@ -22,6 +22,13 @@ func must(err error) {
 	}
 }
 
+func kill(procs []*os.Process) {
+	for _, proc := range procs {
+		_ = proc.Kill()
+	}
+	os.Exit(0)
+}
+
 func main() {
 	config := read_config()
 	events := make(chan string, 5)
@@ -31,10 +38,7 @@ func main() {
 
 	go func() {
 		for _ = range sigs {
-			for _, proc := range procs {
-				_ = proc.Kill()
-			}
-			os.Exit(0)
+			kill(procs)
 		}
 	}()
 
@@ -53,5 +57,6 @@ func main() {
 		must(err)
 		procs = append(procs, proc)
 	}
+	defer kill(procs)
 	server(events)
 }

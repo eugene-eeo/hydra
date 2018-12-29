@@ -2,7 +2,7 @@ package main
 
 import "net"
 
-func server(events chan string) {
+func server(events chan string) error {
 	subs := make(chan net.Conn)
 	go func() {
 		conns := []net.Conn{}
@@ -24,11 +24,14 @@ func server(events chan string) {
 		}
 	}()
 	ln, err := net.Listen("tcp", "localhost:9900")
-	must(err)
+	if err != nil {
+		return err
+	}
 	for {
 		conn, err := ln.Accept()
 		if err == nil {
 			subs <- conn
 		}
 	}
+	return nil
 }
