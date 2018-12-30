@@ -33,8 +33,14 @@ func main() {
 	config := read_config()
 	events := make(chan string, 5)
 	procs := []*os.Process{}
-	sigs := make(chan os.Signal, 2)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGKILL,
+		syscall.SIGTERM,
+		syscall.SIGSTOP,
+	)
 
 	go func() {
 		for _ = range sigs {
