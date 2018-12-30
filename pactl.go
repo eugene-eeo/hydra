@@ -1,9 +1,11 @@
 package main
 
 import "bufio"
-import "strings"
+import "bytes"
 import "os"
 import "os/exec"
+
+var pactlChange = []byte("change")
 
 func pactlEvents(events chan string) (*os.Process, error) {
 	cmd := exec.Command("pactl", "subscribe")
@@ -14,8 +16,7 @@ func pactlEvents(events chan string) (*os.Process, error) {
 	go func() {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
-			line := r.Text()
-			if strings.Contains(line, "change") {
+			if bytes.Contains(r.Bytes(), pactlChange) {
 				events <- "pactl"
 			}
 		}

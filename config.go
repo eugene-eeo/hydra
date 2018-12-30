@@ -78,9 +78,8 @@ func (p *Proc) Run(events chan string) (*os.Process, error) {
 		// sent to kill it.
 		r := bufio.NewScanner(out)
 		for r.Scan() {
-			line := r.Text()
 			for _, m := range p.matchers {
-				if m.regex.MatchString(line) {
+				if m.regex.Match(r.Bytes()) {
 					events <- m.name
 					break
 				}

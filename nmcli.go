@@ -3,7 +3,10 @@ package main
 import "bufio"
 import "os"
 import "os/exec"
-import "strings"
+import "bytes"
+
+var nmcliConnected = []byte("connected")
+var nmcliAvailable = []byte("available")
 
 func nmcliEvents(events chan string) (*os.Process, error) {
 	cmd := exec.Command("nmcli", "monitor")
@@ -15,9 +18,7 @@ func nmcliEvents(events chan string) (*os.Process, error) {
 		defer cmd.Process.Kill()
 		r := bufio.NewScanner(out)
 		for r.Scan() {
-			// disconnected has the same suffix
-			line := r.Text()
-			if strings.HasSuffix(line, "connected") || strings.HasSuffix(line, "available") {
+			if bytes.HasSuffix(r.Bytes(), nmcliConnected) || bytes.HasSuffix(r.Bytes(), nmcliAvailable) {
 				events <- "nmcli"
 			}
 		}
