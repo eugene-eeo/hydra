@@ -43,10 +43,11 @@ func main() {
 	)
 
 	go func() {
-		for _ = range sigs {
-			kill(procs)
-		}
+		<-sigs
+		kill(procs)
 	}()
+
+	defer kill(procs)
 
 	if config.EnablePactl {
 		proc, err := pactlEvents(events)
@@ -63,6 +64,5 @@ func main() {
 		must(err)
 		procs = append(procs, proc)
 	}
-	defer kill(procs)
-	server(events)
+	_ = server(events)
 }

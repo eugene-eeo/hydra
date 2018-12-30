@@ -15,7 +15,6 @@ func nmcliEvents(events chan string) (*os.Process, error) {
 		return nil, err
 	}
 	go func() {
-		defer cmd.Process.Kill()
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			if bytes.HasSuffix(r.Bytes(), nmcliConnected) || bytes.HasSuffix(r.Bytes(), nmcliAvailable) {
