@@ -7,7 +7,9 @@ import "os/exec"
 
 var pactlChange = []byte("change")
 
-func pactlEvents(events chan string) (*os.Process, error) {
+type pactlProc struct{}
+
+func (_ *pactlProc) Run(events chan string) (*os.Process, error) {
 	cmd := exec.Command("pactl", "subscribe")
 	out, err := cmd.StdoutPipe()
 	if err != nil {

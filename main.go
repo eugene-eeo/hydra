@@ -1,11 +1,12 @@
 package main
 
+import "fmt"
 import "os"
 import "os/signal"
 import "syscall"
 import "github.com/mitchellh/go-homedir"
 
-func read_config() *Config {
+func read_config() []Runnable {
 	path, err := homedir.Expand("~/.hydrarc.json")
 	must(err)
 	f, err := os.Open(path)
@@ -18,21 +19,22 @@ func read_config() *Config {
 
 func must(err error) {
 	if err != nil {
-		panic(err)
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
 	}
 }
 
 func kill(procs []*os.Process) {
 	for _, proc := range procs {
-		_ = proc.Kill()
+		if proc != nil {
+			_ = proc.Kill()
+		}
 	}
-	os.Exit(0)
 }
 
-func main() {
-	config := read_config()
+func spawn_and_listen(runnables []Runnable) error {
 	events := make(chan string, 5)
-	procs := []*os.Process{}
+	procs := make([]*os.Process, len(runnables))
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs,
 		syscall.SIGHUP,
@@ -41,28 +43,23 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGSTOP,
 	)
-
 	go func() {
 		<-sigs
 		kill(procs)
+		os.Exit(0)
 	}()
-
 	defer kill(procs)
-
-	if config.EnablePactl {
-		proc, err := pactlEvents(events)
-		must(err)
-		procs = append(procs, proc)
-	}
-	if config.EnableNmcli {
-		proc, err := nmcliEvents(events)
-		must(err)
-		procs = append(procs, proc)
-	}
-	for _, p := range config.Procs {
+	for i, p := range runnables {
 		proc, err := p.Run(events)
-		must(err)
-		procs = append(procs, proc)
+		if err != nil {
+			return err
+		}
+		procs[i] = proc
 	}
-	_ = server(events)
+	return server(events)
+}
+
+func main() {
+	config := read_config()
+	must(spawn_and_listen(config))
 }

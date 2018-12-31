@@ -1,7 +1,7 @@
 # Hydra
 
 Hydra is a simple daemon that runs in the background and emits events to clients.
-It is an overkill (some would say un-UNIX-y) solution/alternative to polling in panel scripts.
+It was originally meant as a solution/alternative to polling in panel scripts.
 By default Hydra listens on port 9900.
 
 ## Install
@@ -29,7 +29,8 @@ To add support for listening to other services, you can add to the
 
 ```json
 {
-  ...
+  "nmcli": true,
+  "pactl": true
   "procs": [
     {
       "proc": ["herbstluftwm", "--idle"],
@@ -42,19 +43,6 @@ To add support for listening to other services, you can add to the
 }
 ```
 
-upon seeing lines that match `^focus_changed`, hydra will emit the
-`hc:focus` event, and similarly for the `hc:tag_change` event.
-Note that the order of the regexes are important. For instance,
-the following produce different output:
-
-```
-[               | [
-  ["1", "^a"],  |   ["2", "^ab"],
-  ["2", "^ab"]  |   ["1", "^a"]
-]               | ]
-```
-
-In the first case, the `1` event is always fired regardless of whether
-the regex for `2` matches. This is intended behaviour from hydra's side.
-If you want your intended behaviour to be used then the second case is
-probably what you want.
+Think of the `match` array as a big switch statement; the first regex
+that matches the line would have have it's event emitted. Thus the
+order of the matchers (entries in the match array) are important.

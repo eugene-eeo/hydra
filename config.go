@@ -8,6 +8,10 @@ import "os"
 import "os/exec"
 import "regexp"
 
+type Runnable interface {
+	Run(chan string) (*os.Process, error)
+}
+
 type Matcher struct {
 	name  string
 	regex *regexp.Regexp
@@ -17,12 +21,6 @@ type Proc struct {
 	cmd      string
 	args     []string
 	matchers []Matcher
-}
-
-type Config struct {
-	EnableNmcli bool
-	EnablePactl bool
-	Procs       []*Proc
 }
 
 type ProcConfig struct {
@@ -36,35 +34,41 @@ type JSONConfig struct {
 	ProcConfigs []*ProcConfig `json:"procs"`
 }
 
-func parseConfig(r io.Reader) (*Config, error) {
-	d := json.NewDecoder(r)
-	c := &JSONConfig{}
-	err := d.Decode(c)
+func parseConfig(r io.Reader) ([]Runnable, error) {
+	c := JSONConfig{}
+	err := json.NewDecoder(r).Decode(&c)
 	if err != nil {
 		return nil, err
 	}
-	cc := &Config{}
-	cc.EnableNmcli = c.EnableNmcli
-	cc.EnablePactl = c.EnablePactl
-	cc.Procs = make([]*Proc, len(c.ProcConfigs))
+	procs := []Runnable{}
 	for i, pc := range c.ProcConfigs {
 		if len(pc.Proc) == 0 {
-			return nil, fmt.Errorf("parseConfig: proc is empty")
+			return nil, fmt.Errorf("parseConfig: procs[%d]: proc is empty", i)
 		}
 		matchers := make([]Matcher, len(pc.Matchers))
 		for j, m := range pc.Matchers {
+			r, err := regexp.Compile(m[1])
+			if err != nil {
+				return nil, fmt.Errorf("parseConfig: procs[%d].match[%d]: error parsing regex", i, j)
+			}
 			matchers[j] = Matcher{
 				name:  m[0],
-				regex: regexp.MustCompile(m[1]),
+				regex: r,
 			}
 		}
-		cc.Procs[i] = &Proc{
+		procs = append(procs, &Proc{
 			cmd:      pc.Proc[0],
 			args:     pc.Proc[1:],
 			matchers: matchers,
-		}
+		})
 	}
-	return cc, nil
+	if c.EnableNmcli {
+		procs = append(procs, &nmcliProc{})
+	}
+	if c.EnablePactl {
+		procs = append(procs, &pactlProc{})
+	}
+	return procs, nil
 }
 
 func (p *Proc) Run(events chan string) (*os.Process, error) {
@@ -74,8 +78,6 @@ func (p *Proc) Run(events chan string) (*os.Process, error) {
 		return nil, err
 	}
 	go func() {
-		// Expect that the process will close stdout when a signal is
-		// sent to kill it.
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			b := r.Bytes()

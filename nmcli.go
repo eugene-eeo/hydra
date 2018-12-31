@@ -8,7 +8,9 @@ import "bytes"
 var nmcliConnected = []byte("connected")
 var nmcliAvailable = []byte("available")
 
-func nmcliEvents(events chan string) (*os.Process, error) {
+type nmcliProc struct{}
+
+func (_ *nmcliProc) Run(events chan string) (*os.Process, error) {
 	cmd := exec.Command("nmcli", "monitor")
 	out, err := cmd.StdoutPipe()
 	if err != nil {
