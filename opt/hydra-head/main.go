@@ -5,14 +5,15 @@ import "bufio"
 import "os"
 import "net"
 
-const waitDelay = 500 * time.Millisecond
-const attempts = 3
-
 func main() {
+	attempts := 5
+	delay := 50 * time.Millisecond
+
 	for i := 0; i < attempts; i++ {
 		conn, err := net.Dial("tcp", "localhost:9900")
 		if err != nil {
-			time.Sleep(waitDelay)
+			time.Sleep(delay)
+			delay *= 2
 			continue
 		}
 		defer conn.Close()
