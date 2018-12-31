@@ -37,7 +37,7 @@ To add support for listening to other services, you can add to the
 ```json
 {
   "nmcli": true,
-  "pactl": true
+  "pactl": true,
   "procs": [
     {
       "proc": ["herbstluftwm", "--idle"],
