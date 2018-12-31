@@ -54,12 +54,13 @@ func spawn_and_listen(runnables []Runnable) error {
 		if err != nil {
 			return err
 		}
+		// gc
+		runnables[i] = nil
 		procs[i] = proc
 	}
 	return server(events)
 }
 
 func main() {
-	config := read_config()
-	must(spawn_and_listen(config))
+	must(spawn_and_listen(read_config()))
 }
