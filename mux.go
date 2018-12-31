@@ -2,6 +2,14 @@ package main
 
 import "net"
 
+func addNewline(s string) []byte {
+	n := len(s)
+	b := make([]byte, n+1)
+	b[n] = '\n'
+	copy(b, s)
+	return b
+}
+
 func server(events chan string) error {
 	subs := make(chan net.Conn)
 	go func() {
@@ -11,13 +19,15 @@ func server(events chan string) error {
 			case sub := <-subs:
 				conns = append(conns, sub)
 			case evt := <-events:
-				b := append([]byte(evt), '\n')
+				b := addNewline(evt)
 				for i := len(conns) - 1; i >= 0; i-- {
 					c := conns[i]
 					_, err := c.Write(b)
 					if err != nil {
 						_ = c.Close()
-						conns = append(conns[:i], conns[i+1:]...)
+						copy(conns[i:], conns[i+1:])
+						conns[len(conns)-1] = nil
+						conns = conns[:len(conns)-1]
 					}
 				}
 			}
@@ -33,5 +43,4 @@ func server(events chan string) error {
 			subs <- conn
 		}
 	}
-	return nil
 }
