@@ -12,6 +12,13 @@ $ go install github.com/eugene-eeo/hydra/opt/hydra-head
 $ echo '{}' > ~/.hydrarc.json
 ```
 
+## Usage
+
+```sh
+$ nohup hydra &  # spawns processes and emits events
+$ hydra-head     # listens to events emitted by hydra
+```
+
 ## Config
 
 Hydra is configured by changing the `~/.hydrarc.json` file.
