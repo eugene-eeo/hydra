@@ -54,10 +54,10 @@ func spawn_and_listen(runnables []Runnable) error {
 		if err != nil {
 			return err
 		}
-		// gc
-		runnables[i] = nil
 		procs[i] = proc
 	}
+	// gc
+	runnables = nil
 	return server(events)
 }
 
