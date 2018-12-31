@@ -21,13 +21,8 @@ to polling in panel scripts. By default *hydra* listens on port 9900.
 ## Config
 
 Options for *hydra* are stored in the `~/.hydrarc.json` file. Note that the
-daemon needs to be restarted for changes to take effect. One way to restart
-the deamon is:
-
-    $ killall hydra
-    $ nohup hydra &
-
-An example config file is:
+daemon needs to be restarted for changes to take effect (you can just kill
+the hydra process). An example config file is:
 
     {
       "nmcli": true,
