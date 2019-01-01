@@ -45,7 +45,7 @@ match and emit events on the relevant lines:
         "match": [
           ["nmcli:connected",    "^.+: connected$"],
           ["nmcli:disconnected", "^.+: disconnected$"],
-          ["nmcli:unavailable",  "^.+: unavailable$"],
+          ["nmcli:unavailable",  "^.+: unavailable$"]
         ]
       }]
     }
