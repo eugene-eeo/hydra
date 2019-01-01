@@ -31,21 +31,20 @@ the hydra process). An example config file is:
 
 This listens to NetworkManager and PulseAudio events. The `nmcli` and
 `pactl` events are emitted for each of those services respectively.
-To add support for listening to other services, you can add to the
-'procs' key in the root config object:
+To listen to services, add more procs to the 'procs' key. Say you wanted
+to send notifications whenever the networkmanager status changes. We can
+match and emit events on the relevant lines:
 
     {
-      "nmcli": true,
-      "pactl": true,
-      "procs": [
-        {
-          "proc": ["herbstluftwm", "--idle"],
-          "match": [
-            ["hc:focus",      "^focus_changed"],
-            ["hc:tag_change", "^tag_changed"]
-          ]
-        }
-      ]
+      "nmcli": false,
+      "procs": [{
+        "proc": ["nmcli", "monitor"],
+        "match": [
+          ["nmcli:connected",    "^.+: connected$"],
+          ["nmcli:disconnected", "^.+: disconnected$"],
+          ["nmcli:unavailable",  "^.+: unavailable$"],
+        ]
+      }]
     }
 
 Think of the `match` array as a big switch statement; each element in
@@ -53,34 +52,15 @@ the array (the matcher) contains an event and regex. The first matcher
 which regex matches the line would have have it's event emitted.
 Thus the order of the matchers is important.
 
-
-## Example
-
-Say you wanted to send notifications whenever the networkmanager
-status changes. We can match against the relevant lines in the
-config file:
-
-    {
-      "nmcli": false,
-      "procs": [{
-        "proc": ["nmcli", "monitor"],
-        "match": [
-          ["nmcli:connected",    "^(.+): connected$"],
-          ["nmcli:disconnected", "^(.+): disconnected$"],
-          ["nmcli:unavailable",  "^(.+): unavailable"],
-        ]
-      }]
-    }
-
 Then we can have a little bash script that runs in the background
 and monitors these events:
 
     #!/bin/bash
     hydra-head | while read event; do
         case "$event" in
-            nmcli:connected)    notify-send 'nm-monitor' "connected to $(iwgetid -r)" ;;
-            nmcli:disconnected) notify-send 'nm-monitor' 'disconnected' ;;
-            nmcli:unavailable)  notify-send 'nm-monitor' 'unavailable' ;;
+            nmcli:connected)    notify-send 'nm' "connected to $(iwgetid -r)" ;;
+            nmcli:disconnected) notify-send 'nm' 'disconnected' ;;
+            nmcli:unavailable)  notify-send 'nm' 'unavailable' ;;
         esac
     done
 
