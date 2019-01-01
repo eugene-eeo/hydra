@@ -5,17 +5,26 @@ import "os"
 import "net"
 
 func main() {
-	conn, err := net.DialTimeout("tcp", "localhost:9900", 500*time.Millisecond)
-	if err != nil {
-		os.Exit(1)
-	}
+	tries := 5
+	delay := 50 * time.Millisecond
 	b := make([]byte, 256)
-	defer conn.Close()
-	for {
-		n, err := conn.Read(b)
-		_, _ = os.Stdout.Write(b[:n])
+
+	for i := 0; i < tries; i++ {
+		conn, err := net.Dial("tcp", "localhost:9900")
 		if err != nil {
-			return
+			time.Sleep(delay)
+			delay *= 2
+			continue
 		}
+		defer conn.Close()
+		for {
+			n, err := conn.Read(b)
+			_, _ = os.Stdout.Write(b[:n])
+			if err != nil {
+				break
+			}
+		}
+		return
 	}
+	os.Exit(1)
 }
