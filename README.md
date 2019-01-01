@@ -4,6 +4,8 @@
 It was originally meant as (and is still used as) a more efficient alternative
 to polling in panel scripts. By default *hydra* listens on port 9900.
 
+*hydra-head* connects to *hydra*'s socket and listens for emitted events.
+
 
 ## Install
 
@@ -16,6 +18,7 @@ to polling in panel scripts. By default *hydra* listens on port 9900.
 
     $ nohup hydra &  # spawns processes and emits events
     $ hydra-head     # listens to events emitted by hydra
+    $ nc localhost 9900  # alternative to hydra-head
 
 
 ## Config
