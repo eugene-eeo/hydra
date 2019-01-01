@@ -1,5 +1,6 @@
 package main
 
+import "io"
 import "time"
 import "os"
 import "net"
@@ -7,7 +8,6 @@ import "net"
 func main() {
 	tries := 5
 	delay := 50 * time.Millisecond
-	b := make([]byte, 256)
 
 	for i := 0; i < tries; i++ {
 		conn, err := net.Dial("tcp", "localhost:9900")
@@ -17,13 +17,7 @@ func main() {
 			continue
 		}
 		defer conn.Close()
-		for {
-			n, err := conn.Read(b)
-			_, _ = os.Stdout.Write(b[:n])
-			if err != nil {
-				break
-			}
-		}
+		_, _ = io.Copy(os.Stdout, conn)
 		return
 	}
 	os.Exit(1)
