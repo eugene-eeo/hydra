@@ -18,6 +18,8 @@ func read_config() []Runnable {
 }
 
 func must(err error) {
+	// care needs to be taken when callig must(err)
+	// since no deferred functions will be ran
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
@@ -26,15 +28,13 @@ func must(err error) {
 
 func kill(procs []*os.Process) {
 	for _, proc := range procs {
-		if proc != nil {
-			_ = proc.Kill()
-		}
+		_ = proc.Kill()
 	}
 }
 
 func spawn_and_listen(runnables []Runnable) error {
 	events := make(chan string, 5)
-	procs := make([]*os.Process, len(runnables))
+	procs := make([]*os.Process, 0, len(runnables))
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs,
 		syscall.SIGHUP,
@@ -49,12 +49,12 @@ func spawn_and_listen(runnables []Runnable) error {
 		os.Exit(0)
 	}()
 	defer kill(procs)
-	for i, p := range runnables {
+	for _, p := range runnables {
 		proc, err := p.Run(events)
 		if err != nil {
 			return err
 		}
-		procs[i] = proc
+		procs = append(procs, proc)
 	}
 	// gc
 	runnables = nil
