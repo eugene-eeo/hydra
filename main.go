@@ -48,7 +48,7 @@ func spawn_and_listen(runnables []Runnable) error {
 		kill(procs)
 		os.Exit(0)
 	}()
-	defer kill(procs)
+	defer func() { kill(procs) }()
 	for _, p := range runnables {
 		proc, err := p.Run(events)
 		if err != nil {
