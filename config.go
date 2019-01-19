@@ -77,18 +77,28 @@ func (p *Proc) Run(events chan string) (*os.Process, error) {
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		r := bufio.NewScanner(out)
-		for r.Scan() {
-			b := r.Bytes()
-			for _, m := range p.matchers {
-				if m.regex.Match(b) {
-					events <- m.name
-					break
+	if len(p.matchers) == 0 {
+		// just forward everything
+		go func() {
+			r := bufio.NewScanner(out)
+			for r.Scan() {
+				events <- r.Text()
+			}
+		}()
+	} else {
+		go func() {
+			r := bufio.NewScanner(out)
+			for r.Scan() {
+				b := r.Bytes()
+				for _, m := range p.matchers {
+					if m.regex.Match(b) {
+						events <- m.name
+						break
+					}
 				}
 			}
-		}
-	}()
+		}()
+	}
 	err = cmd.Start()
 	return cmd.Process, err
 }
