@@ -2,7 +2,8 @@
 
 *hydra* is a simple daemon that emits events to clients listening over TCP.
 It was originally meant as (and is still used as) a more efficient alternative
-to polling in panel scripts. By default *hydra* listens on port 9900.
+to polling in panel scripts. Using *hydra* one can create a more unix-y
+alternative to polybar. By default *hydra* listens on port 9900.
 
 *hydra-head* connects to *hydra*'s socket and listens for emitted events.
 
