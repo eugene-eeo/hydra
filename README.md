@@ -40,7 +40,6 @@ to send notifications whenever the networkmanager status changes. We can
 match and emit events on the relevant lines:
 
     {
-      "nmcli": false,
       "procs": [{
         "proc": ["nmcli", "monitor"],
         "match": [
