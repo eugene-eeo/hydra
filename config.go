@@ -46,13 +46,13 @@ func parseConfig(r io.Reader) ([]Runnable, error) {
 			return nil, fmt.Errorf("parseConfig: procs[%d]: proc is empty", i)
 		}
 		matchers := make([]Matcher, len(pc.Matchers))
-		for j, m := range pc.Matchers {
-			r, err := regexp.Compile(m[1])
+		for j, pair := range pc.Matchers {
+			r, err := regexp.Compile(pair[1])
 			if err != nil {
 				return nil, fmt.Errorf("parseConfig: procs[%d].match[%d]: error parsing regex", i, j)
 			}
 			matchers[j] = Matcher{
-				name:  m[0],
+				name:  pair[0],
 				regex: r,
 			}
 		}
