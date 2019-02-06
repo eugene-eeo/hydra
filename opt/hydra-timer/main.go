@@ -4,18 +4,15 @@ import "time"
 import "fmt"
 import "os"
 
-const USAGE = `usage: hydra-timer <format>`
-
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, USAGE)
+		fmt.Fprintln(os.Stderr, "usage: hydra-timer <format>")
 		os.Exit(1)
 	}
 	format := os.Args[1]
-	ticks := time.Tick(1 * time.Second)
 	prev := ""
 	for {
-		<-ticks
+		time.Sleep(1 * time.Second)
 		curr := time.Now().Format(format)
 		if prev != curr {
 			prev = curr
