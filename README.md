@@ -1,4 +1,4 @@
-<img src='logo/hydra.png'/>
+<p align='center'><img src='logo/hydra.png' height='250px'/></p>
 
 *hydra* is a simple daemon that emits events to clients listening over TCP.
 It was originally meant as (and is still used as) a more efficient alternative
