@@ -11,7 +11,7 @@ alternative to polybar. By default *hydra* listens on port 9900.
 ## Install
 
     $ go install github.com/eugene-eeo/hydra
-    $ go install github.com/eugene-eeo/hydra/opt/hydra-head
+    $ go install github.com/eugene-eeo/hydra/...
     $ echo '{}' > ~/.hydrarc.json
 
 

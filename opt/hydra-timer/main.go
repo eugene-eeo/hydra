@@ -12,11 +12,11 @@ func main() {
 	format := os.Args[1]
 	prev := ""
 	for {
-		time.Sleep(1 * time.Second)
 		curr := time.Now().Format(format)
 		if prev != curr {
 			prev = curr
 			fmt.Printf("date\t%s\n", curr)
 		}
+		time.Sleep(1 * time.Second)
 	}
 }
