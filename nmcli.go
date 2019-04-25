@@ -5,9 +5,6 @@ import "os"
 import "os/exec"
 import "bytes"
 
-var nmcliConnected = []byte("connected")
-var nmcliAvailable = []byte("available")
-
 type nmcliProc struct{}
 
 func (_ *nmcliProc) Run(events chan string) (*os.Process, error) {
@@ -20,7 +17,7 @@ func (_ *nmcliProc) Run(events chan string) (*os.Process, error) {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			b := r.Bytes()
-			if bytes.HasSuffix(b, nmcliConnected) || bytes.HasSuffix(b, nmcliAvailable) {
+			if bytes.HasSuffix(b, []byte("connected")) || bytes.HasSuffix(b, []byte("available")) {
 				events <- "nmcli"
 			}
 		}

@@ -5,8 +5,6 @@ import "bytes"
 import "os"
 import "os/exec"
 
-var pactlChange = []byte("change")
-
 type pactlProc struct{}
 
 func (_ *pactlProc) Run(events chan string) (*os.Process, error) {
@@ -21,7 +19,7 @@ func (_ *pactlProc) Run(events chan string) (*os.Process, error) {
 			// ideally we want to emit events for just sink changes
 			// but if we do that then the listeners will not get an
 			// accurate volume read
-			if bytes.Contains(r.Bytes(), pactlChange) {
+			if bytes.Contains(r.Bytes(), []byte("change")) {
 				events <- "pactl"
 			}
 		}
