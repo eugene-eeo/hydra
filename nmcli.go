@@ -17,6 +17,8 @@ func (_ *nmcliProc) Run(events chan string) (*os.Process, error) {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
 			b := r.Bytes()
+			// don't need to check for HasSuffix(b, "disconnected") because
+			// HasSuffix(b, "connected") handles that as well
 			if bytes.HasSuffix(b, []byte("connected")) || bytes.HasSuffix(b, []byte("available")) {
 				events <- "nmcli"
 			}
