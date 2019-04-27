@@ -8,7 +8,6 @@ import "net"
 func main() {
 	tries := 5
 	delay := 50 * time.Millisecond
-
 	for i := 0; i < tries; i++ {
 		conn, err := net.Dial("tcp", "localhost:9900")
 		if err != nil {
@@ -17,8 +16,9 @@ func main() {
 			continue
 		}
 		defer conn.Close()
-		_, _ = io.Copy(os.Stdout, conn)
+		io.Copy(os.Stdout, conn)
 		return
 	}
+	// Cannot reach the daemon
 	os.Exit(1)
 }

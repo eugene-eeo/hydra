@@ -16,10 +16,7 @@ func (_ *pactlProc) Run(events chan string) (*os.Process, error) {
 	go func() {
 		r := bufio.NewScanner(out)
 		for r.Scan() {
-			// ideally we want to emit events for just sink changes
-			// but if we do that then the listeners will not get an
-			// accurate volume read
-			if bytes.Contains(r.Bytes(), []byte("change")) {
+			if bytes.HasPrefix(r.Bytes(), []byte("Event 'change' on sink")) {
 				events <- "pactl"
 			}
 		}
