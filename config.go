@@ -35,32 +35,34 @@ type JSONConfig struct {
 }
 
 func parseConfig(r io.Reader) ([]Runnable, error) {
-	c := JSONConfig{}
-	err := json.NewDecoder(r).Decode(&c)
-	if err != nil {
+	d := json.NewDecoder(r)
+	c := &JSONConfig{}
+	if err := d.Decode(c); err != nil {
 		return nil, err
 	}
-	procs := []Runnable{}
+	return getRunnables(c)
+}
+
+func getRunnables(c *JSONConfig) ([]Runnable, error) {
+	procs := make([]Runnable, len(c.ProcConfigs))
 	for i, pc := range c.ProcConfigs {
 		if len(pc.Proc) == 0 {
 			return nil, fmt.Errorf("parseConfig: procs[%d]: proc is empty", i)
 		}
 		matchers := make([]Matcher, len(pc.Matchers))
 		for j, pair := range pc.Matchers {
-			r, err := regexp.Compile(pair[1])
+			name := pair[0]
+			regex, err := regexp.Compile(pair[1])
 			if err != nil {
 				return nil, fmt.Errorf("parseConfig: procs[%d].match[%d]: error parsing regex", i, j)
 			}
-			matchers[j] = Matcher{
-				name:  pair[0],
-				regex: r,
-			}
+			matchers[j] = Matcher{name, regex}
 		}
-		procs = append(procs, &Proc{
+		procs[i] = &Proc{
 			cmd:      pc.Proc[0],
 			args:     pc.Proc[1:],
 			matchers: matchers,
-		})
+		}
 	}
 	if c.EnableNmcli {
 		procs = append(procs, &nmcliProc{})
