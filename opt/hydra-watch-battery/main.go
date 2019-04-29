@@ -4,7 +4,6 @@ import "time"
 import "os"
 import "github.com/xshellinc/tools/lib/inotify"
 
-var battery = []byte("battery\n")
 var files = []string{
 	"/sys/class/power_supply/BAT0/charge_now",
 	"/sys/class/power_supply/AC/uevent",
@@ -29,7 +28,7 @@ func main() {
 		<-watcher.C
 		t := time.Now()
 		if t.Sub(t0).Seconds() > 0.01 {
-			_, _ = os.Stdout.Write(battery)
+			_, _ = os.Stdout.Write([]byte("battery\n"))
 			t0 = t
 		}
 	}
