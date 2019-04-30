@@ -1,9 +1,8 @@
 <p align='center'><img src='logo/hydra.png' height='250px'/></p>
 
 *hydra* is a simple daemon that emits events to clients listening over TCP.
-It was originally meant as (and is still used as) a more efficient alternative
-to polling in panel scripts. Using *hydra* one can create a more unix-y
-alternative to polybar. By default *hydra* listens on port 9900.
+It was originally meant as (and is still used everyday as) a more efficient
+alternative to polling in panel scripts. *hydra* listens on port 9900.
 
 *hydra-head* connects to *hydra*'s socket and listens for emitted events.
 
@@ -11,7 +10,7 @@ alternative to polybar. By default *hydra* listens on port 9900.
 ## Install
 
     $ go install github.com/eugene-eeo/hydra
-    $ go install github.com/eugene-eeo/hydra/...
+    $ go install github.com/eugene-eeo/hydra/opt/hydra-head
     $ echo '{}' > ~/.hydrarc.json
 
 
@@ -35,7 +34,7 @@ the hydra process). An example config file is:
 
 This listens to NetworkManager and PulseAudio events. The `nmcli` and
 `pactl` events are emitted for each of those services respectively.
-To listen to services, add more procs to the 'procs' key. Say you wanted
+To listen to services, add more procs to the `procs` key. Say you wanted
 to send notifications whenever the networkmanager status changes. We can
 match and emit events on the relevant lines:
 
@@ -72,3 +71,20 @@ and monitors these events:
 The advantage for using hydra becomes apparent when you have multiple
 of these monitor scripts; you don't have to spawn multiple instances
 of `nmcli monitor`.
+
+## Tips
+
+Even more dynamicism is possible using the `hydra-emit` tool:
+
+    $ go install github.com/eugene-eeo/hydra/opt/hydra-emit
+    $ cat ~/.hydrarc.json
+    {
+      "procs": [
+        {"proc": ["hydra-emit", "server"]}
+      ]
+    }
+
+Then you can emit events to all listening clients using:
+
+    $ hydra-emit emit 'abc'
+
