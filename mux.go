@@ -25,7 +25,7 @@ func server(events chan string) error {
 					_, err := c.Write(b)
 					if err != nil {
 						_ = c.Close()
-						copy(conns[i:], conns[i+1:])
+						conns[i] = conns[len(conns)-1]
 						conns[len(conns)-1] = nil
 						conns = conns[:len(conns)-1]
 					}
