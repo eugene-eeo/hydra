@@ -21,7 +21,7 @@ func must(err error) {
 	// care needs to be taken when callig must(err)
 	// since no deferred functions will be ran
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

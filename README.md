@@ -72,6 +72,7 @@ The advantage for using hydra becomes apparent when you have multiple
 of these monitor scripts; you don't have to spawn multiple instances
 of `nmcli monitor`.
 
+
 ## Tips
 
 Even more dynamicism is possible using the `hydra-emit` tool:
