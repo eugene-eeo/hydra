@@ -34,13 +34,13 @@ the hydra process). An example config file is:
 
 This listens to NetworkManager and PulseAudio events. The `nmcli` and
 `pactl` events are emitted for each of those services respectively.
-To listen to services, add more procs to the `procs` key. Say you wanted
-to send notifications whenever the networkmanager status changes. We can
-match and emit events on the relevant lines:
+To listen to services, add more declarations to the `procs` key. Say you
+wanted to send events whenever the networkmanager status changes.
+We can match and emit on the relevant lines:
 
     {
       "procs": [{
-        "proc": ["nmcli", "monitor"],
+        "proc": "nmcli monitor",
         "match": [
           ["nmcli:connected",    "^.+: connected$"],
           ["nmcli:disconnected", "^.+: disconnected$"],
@@ -50,11 +50,11 @@ match and emit events on the relevant lines:
     }
 
 Think of the `match` array as a big switch statement; each element in
-the array (the matcher) contains an event and regex. The first matcher
-which regex matches the line would have have it's event emitted.
-Thus the order of the matchers is important. If the `match` array is
-empty, then *hydra* simply forwards all output from the process, line
-by line to listening clients.
+the array (the matcher) contains an event and regex. The output of the
+process is processed line-by-line; The first matcher whice regex matches
+the line has its event emitted. Thus the order of the matchers is important.
+If the `match` array is empty, then all output from the process is forwarded
+line by line to all clients.
 
 Then we can have a little bash script that runs in the background
 and monitors these events:
