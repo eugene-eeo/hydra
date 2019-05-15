@@ -1,3 +1,5 @@
+INSTALL_FLAGS = -ldflags='-s -w'
+
 build:
 	go build
 	go build ./opt/hydra-head
@@ -6,8 +8,8 @@ build:
 	go build ./opt/hydra-emit
 
 install:
-	go install .
-	go install ./opt/hydra-head
-	go install ./opt/hydra-watch-battery
-	go install ./opt/hydra-timer
-	go install ./opt/hydra-emit
+	go install ${INSTALL_FLAGS} .
+	go install ${INSTALL_FLAGS} ./opt/hydra-head
+	go install ${INSTALL_FLAGS} ./opt/hydra-watch-battery
+	go install ${INSTALL_FLAGS} ./opt/hydra-timer
+	go install ${INSTALL_FLAGS} ./opt/hydra-emit
