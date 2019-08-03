@@ -1,6 +1,5 @@
 package main
 
-import "time"
 import "os"
 import "github.com/xshellinc/tools/lib/inotify"
 
@@ -19,17 +18,12 @@ func main() {
 	watcher, err := inotify.New()
 	must(err)
 	for _, file := range files {
-		_, err := watcher.Add(file, inotify.InAccess|inotify.InCloseWrite)
+		_, err := watcher.Add(file, inotify.InAccess|inotify.InModify)
 		must(err)
 	}
 	defer watcher.Close()
-	t0 := time.Now()
 	for {
 		<-watcher.C
-		t := time.Now()
-		if t.Sub(t0).Seconds() > 0.01 {
-			_, _ = os.Stdout.Write([]byte("battery\n"))
-			t0 = t
-		}
+		_, _ = os.Stdout.Write([]byte("battery\n"))
 	}
 }
