@@ -1,5 +1,6 @@
 package main
 
+import "runtime"
 import "os"
 import "github.com/xshellinc/tools/lib/inotify"
 
@@ -15,6 +16,7 @@ func must(err error) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(1)
 	watcher, err := inotify.New()
 	must(err)
 	for _, file := range files {
